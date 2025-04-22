@@ -1,8 +1,9 @@
+import { kv } from "./client";
 import type { Result, Session } from "./types";
 
 export type SessionResult = Result<Session>;
 
-export async function addSession(kv: Deno.Kv, session: Session): Promise<SessionResult> {
+export async function addSession(session: Session): Promise<SessionResult> {
   const key: Deno.KvKey = ["sessions", session.id];
   await kv.set(key, session);
   await kv.set(["sessionsByUserId", session.userId, session.id], key); // https://docs.deno.com/deploy/kv/manual/#improve-querying-with-secondary-indexes
@@ -10,7 +11,6 @@ export async function addSession(kv: Deno.Kv, session: Session): Promise<Session
 }
 
 export async function updateSession(
-  kv: Deno.Kv,
   session: Partial<Session>,
   id: Session["id"]
 ): Promise<SessionResult> {
@@ -24,7 +24,7 @@ export async function updateSession(
   return { error: null, value: sessionUpdate };
 }
 
-export async function getSession(kv: Deno.Kv, id: Session["id"]): Promise<SessionResult> {
+export async function getSession(id: Session["id"]): Promise<SessionResult> {
   const { value: session } = await kv.get<Session>(["sessions", id]);
 
   if (!session) {
@@ -34,14 +34,11 @@ export async function getSession(kv: Deno.Kv, id: Session["id"]): Promise<Sessio
   return { error: null, value: session };
 }
 
-export async function deleteSession(kv: Deno.Kv, id: Session["id"]) {
+export async function deleteSession(id: Session["id"]) {
   await kv.delete(["sessions", id]);
 }
 
-export async function deleteSessionsByUserId(
-  kv: Deno.Kv,
-  userId: Session["userId"]
-): Promise<Result<null>> {
+export async function deleteSessionsByUserId(userId: Session["userId"]): Promise<Result<null>> {
   try {
     const sessionKeys = kv.list<Deno.KvKey>({
       prefix: ["sessionsByUserId", userId],

@@ -1,6 +1,7 @@
-import { beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import type { User } from "../db/types";
 import { addUser, getUser, updateUser, deleteUser } from "../db/user";
+import { kv } from "../db/client";
 
 const testUser: User = {
   id: "test-user-id",
@@ -9,14 +10,27 @@ const testUser: User = {
   createdAt: new Date(),
 };
 
-let kv: Deno.Kv;
+let memoryKv: Deno.Kv;
+
+// Mock the Deno.openKv function to use an in-memory database
+vi.mock("../db/client", async () => {
+  return {
+    get kv() {
+      return memoryKv;
+    },
+  };
+});
 
 beforeEach(async () => {
-  kv = await Deno.openKv(":memory:");
+  memoryKv = await Deno.openKv(":memory:");
+});
+
+afterEach(async () => {
+  memoryKv.close();
 });
 
 test("It should add a user", async () => {
-  await addUser(kv, testUser);
+  await addUser(testUser);
 
   const { value: storedUser } = await kv.get<User>(["users", testUser.id]);
 
@@ -28,9 +42,9 @@ test("It should add a user", async () => {
 });
 
 test("It should get a user", async () => {
-  await addUser(kv, testUser);
+  await addUser(testUser);
 
-  const { error, value: user } = await getUser(kv, testUser.id);
+  const { error, value: user } = await getUser(testUser.id);
 
   if (error) {
     throw new Error(error.message);
@@ -42,14 +56,14 @@ test("It should get a user", async () => {
 test("It should update a user", async () => {
   const updatedUser = { ...testUser, name: "Updated Test User" };
 
-  await addUser(kv, testUser);
-  const { error } = await updateUser(kv, { name: updatedUser.name }, testUser.id);
+  await addUser(testUser);
+  const { error } = await updateUser({ name: updatedUser.name }, testUser.id);
 
   if (error) {
     throw new Error(error.message);
   }
 
-  const { value: storedUser } = await getUser(kv, testUser.id);
+  const { value: storedUser } = await getUser(testUser.id);
 
   if (!storedUser) {
     throw new Error("User not found");
@@ -59,15 +73,15 @@ test("It should update a user", async () => {
 });
 
 test("It should delete a user", async () => {
-  await addUser(kv, testUser);
+  await addUser(testUser);
 
-  const { value: userBeforeDelete } = await getUser(kv, testUser.id);
+  const { value: userBeforeDelete } = await getUser(testUser.id);
   if (!userBeforeDelete) {
     throw new Error("User not found");
   }
 
-  await deleteUser(kv, testUser.id);
-  const { value: userAfterDelete } = await getUser(kv, testUser.id);
+  await deleteUser(testUser.id);
+  const { value: userAfterDelete } = await getUser(testUser.id);
 
   expect(userAfterDelete).toBeNull();
 });

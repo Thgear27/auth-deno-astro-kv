@@ -1,4 +1,4 @@
-import { beforeEach, expect, test } from "vitest";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import type { Session } from "../db/types";
 import {
   addSession,
@@ -7,12 +7,7 @@ import {
   deleteSession,
   deleteSessionsByUserId,
 } from "../db/session";
-
-let kv: Deno.Kv;
-
-beforeEach(async () => {
-  kv = await Deno.openKv(":memory:");
-});
+import { kv } from "../db/client";
 
 const testSession: Session = {
   id: "test-session-id",
@@ -20,8 +15,27 @@ const testSession: Session = {
   expiresAt: new Date(Date.now() + 1000 * 60 * 60), // 1 hour from now
 };
 
+let memoryKv: Deno.Kv;
+
+// Mock the Deno.openKv function to use an in-memory database
+vi.mock("../db/client", async () => {
+  return {
+    get kv() {
+      return memoryKv;
+    },
+  };
+});
+
+beforeEach(async () => {
+  memoryKv = await Deno.openKv(":memory:");
+});
+
+afterEach(async () => {
+  memoryKv.close();
+});
+
 test("It should create a session", async () => {
-  await addSession(kv, testSession);
+  await addSession(testSession);
 
   const { value: storedSession } = await kv.get<Session>(["sessions", testSession.id]);
 
@@ -38,8 +52,8 @@ test("It should update a session", async () => {
     expiresAt: new Date(Date.now() + 1000 * 60 * 120),
   }; // 2 hours from now
 
-  await addSession(kv, testSession);
-  const { error } = await updateSession(kv, updatedSession, testSession.id);
+  await addSession(testSession);
+  const { error } = await updateSession(updatedSession, testSession.id);
 
   if (error) {
     throw new Error(error.message);
@@ -55,8 +69,8 @@ test("It should update a session", async () => {
 });
 
 test("It should get a session", async () => {
-  await addSession(kv, testSession);
-  const { error, value: session } = await getSession(kv, testSession.id);
+  await addSession(testSession);
+  const { error, value: session } = await getSession(testSession.id);
 
   if (error) {
     throw new Error(error.message);
@@ -66,17 +80,17 @@ test("It should get a session", async () => {
 });
 
 test("It should delete a session", async () => {
-  await addSession(kv, testSession);
+  await addSession(testSession);
 
-  const { value: sessionBeforeDelete } = await getSession(kv, testSession.id);
+  const { value: sessionBeforeDelete } = await getSession(testSession.id);
 
   if (!sessionBeforeDelete) {
     throw new Error("Session not found");
   }
 
-  await deleteSession(kv, testSession.id);
+  await deleteSession(testSession.id);
 
-  const { value: sessionAfterDelete } = await getSession(kv, testSession.id);
+  const { value: sessionAfterDelete } = await getSession(testSession.id);
 
   expect(sessionAfterDelete).toBeNull();
 });
@@ -100,19 +114,19 @@ test("It should delete all session by user id", async () => {
     expiresAt: new Date(),
   };
 
-  await addSession(kv, session1); // This session will be deleted
-  await addSession(kv, session2); // This session will be deleted
-  await addSession(kv, session3); // This session will not be deleted
+  await addSession(session1); // This session will be deleted
+  await addSession(session2); // This session will be deleted
+  await addSession(session3); // This session will not be deleted
 
-  const { error } = await deleteSessionsByUserId(kv, "user-id");
+  const { error } = await deleteSessionsByUserId("user-id");
 
   if (error) {
     throw new Error(error.message);
   }
 
-  const { value: deletedSession1 } = await getSession(kv, session1.id);
-  const { value: deletedSession2 } = await getSession(kv, session2.id);
-  const { value: notDeletedSession } = await getSession(kv, session3.id);
+  const { value: deletedSession1 } = await getSession(session1.id);
+  const { value: deletedSession2 } = await getSession(session2.id);
+  const { value: notDeletedSession } = await getSession(session3.id);
 
   expect(deletedSession1).toBeNull();
   expect(deletedSession2).toBeNull();
