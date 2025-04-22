@@ -8,16 +8,20 @@
     "preview": "deno run --allow-net --allow-read --unstable-kv --allow-env ./dist/server/entry.mjs",
     "astro": "astro",
     "test": "deno run -A --unstable-kv npm:vitest",
-    "generate:types:deno": "deno types > lib.deno.d.ts"
+    "generate:types:deno": "deno types > lib.deno.d.ts",
+    "check:format": "prettier --check --plugin prettier-plugin-astro .",
+    "format": "prettier --write --plugin prettier-plugin-astro ."
   },
   "dependencies": {
     "@astrojs/deno": "5.0.1",
     "@oslojs/crypto": "1.0.1",
     "@oslojs/encoding": "1.1.0",
-    "astro": "5.7.4"
+    "astro": "5.7.4",
+    "prettier": "3.5.3",
+    "prettier-plugin-astro": "0.14.1"
   },
   "devDependencies": {
-    "vitest": "^3.1.2"
+    "vitest": "3.1.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

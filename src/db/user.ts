@@ -7,7 +7,11 @@ export async function addUser(kv: Deno.Kv, user: User): Promise<UserResult> {
   return { error: null, value: user };
 }
 
-export async function updateUser(kv: Deno.Kv, user: Partial<User>, id: User["id"]): Promise<UserResult> {
+export async function updateUser(
+  kv: Deno.Kv,
+  user: Partial<User>,
+  id: User["id"]
+): Promise<UserResult> {
   const { value: currentUser } = await kv.get<User>(["users", id]);
   if (!currentUser) {
     return { error: { message: "User not found" }, value: null };

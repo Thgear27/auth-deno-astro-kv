@@ -1,6 +1,12 @@
 import { beforeEach, expect, test } from "vitest";
 import type { Session } from "../db/types";
-import { addSession, updateSession, getSession, deleteSession, deleteSessionsByUserId } from "../db/session";
+import {
+  addSession,
+  updateSession,
+  getSession,
+  deleteSession,
+  deleteSessionsByUserId,
+} from "../db/session";
 
 let kv: Deno.Kv;
 
@@ -27,7 +33,10 @@ test("It should create a session", async () => {
 });
 
 test("It should update a session", async () => {
-  const updatedSession = { ...testSession, expiresAt: new Date(Date.now() + 1000 * 60 * 120) }; // 2 hours from now
+  const updatedSession = {
+    ...testSession,
+    expiresAt: new Date(Date.now() + 1000 * 60 * 120),
+  }; // 2 hours from now
 
   await addSession(kv, testSession);
   const { error } = await updateSession(kv, updatedSession, testSession.id);

@@ -9,7 +9,11 @@ export async function addSession(kv: Deno.Kv, session: Session): Promise<Session
   return { error: null, value: session };
 }
 
-export async function updateSession(kv: Deno.Kv, session: Partial<Session>, id: Session["id"]): Promise<SessionResult> {
+export async function updateSession(
+  kv: Deno.Kv,
+  session: Partial<Session>,
+  id: Session["id"]
+): Promise<SessionResult> {
   const { value: currentSession } = await kv.get<Session>(["sessions", id]);
   if (!currentSession) {
     return { error: { message: "Session not found" }, value: null };
@@ -34,9 +38,14 @@ export async function deleteSession(kv: Deno.Kv, id: Session["id"]) {
   await kv.delete(["sessions", id]);
 }
 
-export async function deleteSessionsByUserId(kv: Deno.Kv, userId: Session["userId"]): Promise<Result<null>> {
+export async function deleteSessionsByUserId(
+  kv: Deno.Kv,
+  userId: Session["userId"]
+): Promise<Result<null>> {
   try {
-    const sessionKeys = kv.list<Deno.KvKey>({ prefix: ["sessionsByUserId", userId] });
+    const sessionKeys = kv.list<Deno.KvKey>({
+      prefix: ["sessionsByUserId", userId],
+    });
 
     for await (const sessionKey of sessionKeys) {
       const { value: session } = await kv.get<Session>(sessionKey.value);
@@ -47,6 +56,9 @@ export async function deleteSessionsByUserId(kv: Deno.Kv, userId: Session["userI
 
     return { error: null, value: null };
   } catch (err) {
-    return { error: { message: "Error deleting sessions by user id" }, value: null };
+    return {
+      error: { message: "Error deleting sessions by user id" },
+      value: null,
+    };
   }
 }

@@ -77,4 +77,6 @@ export async function invalidateAllSessions(userId: User["id"]): Promise<void> {
   }
 }
 
-export type SessionValidationResult = { session: Session; user: User } | { session: null; user: null };
+export type SessionValidationResult =
+  | { session: Session; user: User }
+  | { session: null; user: null };
