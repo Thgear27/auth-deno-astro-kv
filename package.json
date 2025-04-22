@@ -22,11 +22,5 @@
   },
   "devDependencies": {
     "vitest": "3.1.2"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp"
-    ]
   }
 }

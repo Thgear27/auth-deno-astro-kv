@@ -1,48 +1,52 @@
-# Astro Starter Kit: Basics
+# Auth Deno KV
 
-```sh
-pnpm create astro@latest -- --template basics
-```
+This project is an authentication system built with Deno, leveraging `Deno.Kv` for data storage. It provides user and session management functionalities, with comprehensive unit tests written using Vitest.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+# 🚀 Features
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+- User Management: Add, update, retrieve, and delete users.
+- Session Management: Create, update, retrieve, and delete sessions.
+- In-Memory Testing: Uses an in-memory Deno.Kv for isolated and fast tests.
+- Astro Integration: Configured for server-side rendering with Astro and Deno.
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+# Setup
 
-## 🚀 Project Structure
+1. Clone the repository:
 
-Inside of your Astro project, you'll see the following folders and files:
+   ```bash
+   git clone
+   cd auth-deno-kv
+   ```
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+2. Install dependencies:
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+   ```bash
+   deno install
+   ```
 
-## 🧞 Commands
+3. Download Deno types:
 
-All commands are run from the root of the project, from a terminal:
+   ```bash
+   deno task generate:types:deno
+   ```
 
-| Command                | Action                                           |
-| :--------------------- | :----------------------------------------------- |
-| `pnpm install`         | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+4. Start the development server:
 
-## 👀 Want to learn more?
+   ```bash
+   deno task dev
+   ```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+# 📦 Scripts
+
+| Command                         | Description                                |
+| ------------------------------- | ------------------------------------------ |
+| `deno task dev`                 | Start Astro dev server with Deno + KV      |
+| `deno task build`               | Build site with Astro                      |
+| `deno task preview`             | Run built server output in Deno            |
+| `deno task astro`               | Run Astro CLI                              |
+| `deno task test`                | Run test suite using Vitest in Deno        |
+| `deno task format`              | Format code with Prettier and Astro plugin |
+| `deno task check:format`        | Check formatting without modifying files   |
+| `deno task generate:types:deno` | Export Deno’s type declarations            |
+
+---
