@@ -7,7 +7,6 @@ import {
   deleteSession,
   deleteSessionsByUserId,
 } from "../db/session";
-import { kv } from "../db/client";
 
 const testSession: Session = {
   id: "test-session-id",
@@ -37,7 +36,7 @@ afterEach(async () => {
 test("It should create a session", async () => {
   await addSession(testSession);
 
-  const { value: storedSession } = await kv.get<Session>(["sessions", testSession.id]);
+  const { value: storedSession } = await getSession(testSession.id);
 
   if (!storedSession) {
     throw new Error("Session not found");
@@ -59,7 +58,7 @@ test("It should update a session", async () => {
     throw new Error(error.message);
   }
 
-  const { value: storedSession } = await kv.get<Session>(["sessions", testSession.id]);
+  const { value: storedSession } = await getSession(testSession.id);
 
   if (!storedSession) {
     throw new Error("Session not found");
