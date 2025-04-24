@@ -5,8 +5,8 @@ import {
   invalidateAllSessions,
   invalidateSession,
   validateSessionToken,
-} from "../auth/api";
-import type { Session, User } from "../db/types";
+} from "../auth/session";
+import type { User } from "../db/types";
 import { encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { getSession, updateSession } from "../db/session";

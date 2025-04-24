@@ -1,0 +1,42 @@
+---
+import { kv } from "../db/client";
+import type { User, Session } from "../db/types";
+import Layout from "../layouts/Layout.astro";
+
+const usersList = kv.list<User>({ prefix: ["users"] });
+
+const users: User[] = [];
+
+for await (const user of usersList) {
+  users.push(user.value);
+}
+
+const sessionsList = kv.list<Session>({ prefix: ["sessions"] });
+const sessions: Session[] = [];
+
+for await (const session of sessionsList) {
+  sessions.push(session.value);
+}
+---
+
+<Layout>
+  <main>
+    <h1>Users:</h1>
+    <pre>{JSON.stringify(users, null, 2)}</pre>
+
+    <h1>Sessions:</h1>
+    <pre>{JSON.stringify(sessions, null, 2)}</pre>
+  </main>
+</Layout>
+
+<style>
+  a {
+    font-size: 2rem;
+  }
+
+  main {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+</style>

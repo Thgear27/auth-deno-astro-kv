@@ -1,21 +1,38 @@
 ---
-import Welcome from "../components/Welcome.astro";
+import { actions } from "astro:actions";
 import Layout from "../layouts/Layout.astro";
-import { kv } from "../db/client";
 
-// await kv.set(["test", 1], { name: "test", value: 1 });
-// await kv.set(["test", 2], { name: "test", value: 2 });
-// await kv.set(["test", 3], { name: "test", value: 3 });
-// await kv.set(["test2", 4], { name: "test", value: 4 });
-// await kv.set(["test2", 5], { name: "test", value: 5 });
-
-// console.log("--------------- List ----------------");
-// const secondList = kv.list({prefix: ["test"]});
-// for await (const item of secondList) {
-//   console.log(item);
-// }
+const user = Astro.locals.user;
 ---
 
 <Layout>
-  <Welcome />
+  <main>
+    {user ? <h1>Hello {user.name}, you are logged in</h1> : <h1>You are not logged in</h1>}
+    {
+      user ? (
+        <form action={actions.auth.logout} method="post">
+          <input type="email" name="email" value={user.email} hidden />
+          <button type="submit">Logout</button>
+        </form>
+      ) : (
+        <>
+          <a href="/login">Login</a>
+          <br />
+          <a href="/register">Register</a>
+        </>
+      )
+    }
+  </main>
 </Layout>
+
+<style>
+  a {
+    font-size: 2rem;
+  }
+
+  main {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+</style>

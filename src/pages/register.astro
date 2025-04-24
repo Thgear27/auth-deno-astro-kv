@@ -1,0 +1,40 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { actions } from "astro:actions";
+
+const result = Astro.getActionResult(actions.auth.register);
+
+const user = Astro.locals.user;
+if (user) return Astro.redirect("/");
+---
+
+<Layout>
+  <main>
+    <form action={actions.auth.register} method="post">
+      <h1>Register</h1>
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required />
+      <br />
+      <label for="email">email:</label>
+      <input type="email" id="email" name="email" required />
+      <br />
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required />
+      <br />
+      <label for="confirm-password">Confirm Password:</label>
+      <input type="password" id="confirm-password" name="confirmPassword" required />
+      <br />
+      <button type="submit">Register</button>
+    </form>
+
+    {result?.error && <p class="error">{result.error.message}</p>}
+  </main>
+</Layout>
+
+<style>
+  main {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+</style>

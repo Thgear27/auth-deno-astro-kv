@@ -2363,6 +2363,7 @@
     "packageJson": {
       "dependencies": [
         "npm:@astrojs/deno@5.0.1",
+        "npm:@node-rs/argon2@^2.0.2",
         "npm:@oslojs/crypto@1.0.1",
         "npm:@oslojs/encoding@1.1.0",
         "npm:astro@5.7.4",
