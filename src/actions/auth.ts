@@ -5,7 +5,6 @@ import { hash, verify } from "@node-rs/argon2";
 import { createSession, generateSessionToken, invalidateSession } from "../auth/session";
 import {
   deleteSessionTokenCookie,
-  getSessionTokenCookie,
   setSessionTokenCookie,
 } from "../auth/cookie";
 

@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "deno run -A --unstable-kv npm:astro dev",
+    "dev": "deno run -A --env-file=.env --unstable-kv npm:astro dev",
     "build": "astro build",
     "preview": "deno run --allow-net --allow-read --unstable-kv --allow-env ./dist/server/entry.mjs",
     "astro": "astro",
@@ -15,9 +15,10 @@
   "dependencies": {
     "@astrojs/deno": "5.0.1",
     "@node-rs/argon2": "^2.0.2",
-    "@oslojs/crypto": "1.0.1",
+    "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "1.1.0",
     "astro": "5.7.4",
+    "googleapis": "^148.0.0",
     "prettier": "3.5.3",
     "prettier-plugin-astro": "0.14.1"
   },
