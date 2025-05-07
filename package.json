@@ -17,10 +17,11 @@
     "@node-rs/argon2": "^2.0.2",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "1.1.0",
+    "arctic": "3.6.0",
     "astro": "5.7.4",
-    "googleapis": "^148.0.0",
     "prettier": "3.5.3",
-    "prettier-plugin-astro": "0.14.1"
+    "prettier-plugin-astro": "0.14.1",
+    "zod": "^3.24.4"
   },
   "devDependencies": {
     "vitest": "3.1.2"

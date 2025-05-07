@@ -1,17 +1,19 @@
 import type { APIContext } from "astro";
-import { googleOAuthClient } from "../../../auth/outh/google";
-import { google } from "googleapis";
 import { addUser, getUserByEmail } from "../../../db/user";
 import type { User } from "../../../db/types";
 import { createSession, generateSessionToken } from "../../../auth/session";
 import { setSessionTokenCookie } from "../../../auth/cookie";
+import { decodeIdToken, type OAuth2Tokens } from "arctic";
+import { google } from "../../../auth/oauth/google";
+import { z } from "zod";
 
 export async function GET(context: APIContext): Promise<Response> {
   const storedState = context.cookies.get("google_oauth_state")?.value ?? null;
+  const storedCodeVerifier = context.cookies.get("google_code_verifier")?.value ?? null;
   const code = context.url.searchParams.get("code");
   const state = context.url.searchParams.get("state");
 
-  if (storedState === null || code === null || state === null) {
+  if (storedState === null || code === null || state === null || storedCodeVerifier === null) {
     return new Response("Missing search params. Please restart the process.", {
       status: 400,
     });
@@ -23,34 +25,44 @@ export async function GET(context: APIContext): Promise<Response> {
     });
   }
 
-  const { tokens } = await googleOAuthClient.getToken(code);
-  googleOAuthClient.setCredentials(tokens);
-
-  const oauth2 = google.oauth2({
-    auth: googleOAuthClient,
-    version: "v2",
-  });
-
-  const { data: userinfo } = await oauth2.userinfo.get();
-  console.log(userinfo);
-
-  if (!userinfo.email || !userinfo.given_name || !userinfo.picture || !userinfo.id) {
-    return new Response("Missing user info. Please restart the process.", {
+  let tokens: OAuth2Tokens;
+  try {
+    tokens = await google.validateAuthorizationCode(code, storedCodeVerifier);
+  } catch (e) {
+    return new Response("Code verifier doesn't macht. Please restart the process.", {
       status: 400,
     });
   }
 
-  const { value: exitingUser } = await getUserByEmail(userinfo.email);
+  const idTokenClaims = decodeIdToken(tokens.idToken());
+  const userInfoSchema = z.object({
+    sub: z.string(),
+    email: z.string().email(),
+    name: z.string(),
+    picture: z.string(),
+    given_name: z.string(),
+    family_name: z.string(),
+  });
+
+  const { success, data: userInfo } = userInfoSchema.safeParse(idTokenClaims);
+
+  if (!success) {
+    return new Response("Invalid user info", {
+      status: 400,
+    });
+  }
+
+  const { value: exitingUser } = await getUserByEmail(userInfo.email);
 
   if (!exitingUser) {
     // Create a new user
     const newUser: User = {
       id: crypto.randomUUID(),
-      email: userinfo.email,
-      name: userinfo.given_name,
-      avatarURL: userinfo.picture,
+      email: userInfo.email,
+      name: userInfo.given_name,
+      avatarURL: userInfo.picture,
       createdAt: new Date(),
-      googleId: userinfo.id,
+      googleId: userInfo.sub,
     };
 
     await addUser(newUser);
@@ -66,9 +78,8 @@ export async function GET(context: APIContext): Promise<Response> {
 
     setSessionTokenCookie(context, token, session.expiresAt);
   } else {
-    // User already exists
-    // Check if the googleId matches
-    if (exitingUser.googleId !== userinfo.id) {
+    // User already exists, check if the googleId matches
+    if (exitingUser.googleId !== userInfo.sub) {
       return new Response("Google ID doesn't match. User has an account with Email and Password", {
         status: 400,
       });
@@ -84,7 +95,5 @@ export async function GET(context: APIContext): Promise<Response> {
     setSessionTokenCookie(context, token, session.expiresAt);
   }
 
-  return new Response("Success", {
-    status: 200,
-  });
+  return context.redirect("/");
 }
